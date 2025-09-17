@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FWI Prediction</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(-45deg, #2c5364, #203a43, #0f2027, #1b2735);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0px 4px 30px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .input-group-text {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+        }
+        .form-control {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+        }
+        .form-control::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+        .form-control:focus {
+            background: rgba(255,255,255,0.2);
+            box-shadow: none;
+            color: white;
+        }
+        .btn-custom {
+            background: linear-gradient(45deg, #ff6b6b, #f06595);
+            border: none;
+            transition: 0.3s ease;
+            font-weight: bold;
+        }
+        .btn-custom:hover {
+            background: linear-gradient(45deg, #f06595, #ff6b6b);
+            transform: scale(1.05);
+            box-shadow: 0px 0px 20px rgba(255,255,255,0.4);
+        }
+        .result-box {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.3rem;
+            margin-top: 20px;
+            animation: slideFadeIn 1s ease forwards;
+        }
+        @keyframes slideFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse {
+            animation: pulseGlow 1.5s infinite alternate;
+        }
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 5px rgba(255,255,255,0.2); }
+            to { box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+        }
+        .loader {
+            display: none;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .check-icon {
+            font-size: 2rem;
+            color: #4CAF50;
+            animation: popIn 0.5s ease;
+        }
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1 class="text-center mb-4"><i class="bi bi-fire text-danger"></i> FWI Prediction</h1>
+        <form action="{{url_for('predict_datapoint')}}" method="post" onsubmit="showLoader()">
+            
+            {% set fields = [
+                ('Temperature', 'bi-thermometer-half'),
+                ('RH', 'bi-moisture'),
+                ('Ws', 'bi-wind'),
+                ('Rain', 'bi-cloud-drizzle'),
+                ('FFMC', 'bi-graph-up'),
+                ('DMC', 'bi-bar-chart'),
+                ('ISI', 'bi-speedometer2'),
+                ('Classes', 'bi-layers'),
+                ('Region', 'bi-geo-alt')
+            ] %}
+            
+            {% for placeholder, icon in fields %}
+            <div class="input-group mb-3">
+                <span class="input-group-text"><i class="bi {{ icon }}"></i></span>
+                <input type="number" step="any" name="{{ placeholder }}" placeholder="{{ placeholder }}" class="form-control" required>
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-custom w-100">Predict</button>
+        </form>
+
+        <!-- Loader -->
+        <div class="loader" id="loader">
+            <div class="spinner-border text-light" role="status"></div>
+            <p>Processing your prediction...</p>
+        </div>
+
+        {% if results %}
+        <div class="result-box pulse">
+            <div class="check-icon"><i class="bi bi-check-circle-fill"></i></div>
+            The Fire Weather Index (FWI) Prediction is: <strong>{{ results }}</strong>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showLoader() {
+            document.getElementById('loader').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+<!--
+<html>
+<body>
+    <div class="login">
+        <h1>FWI Prediction</h1>
+
+        Main Input For Receiving Query to our ML
+        <form action="{{url_for('predict_datapoint')}}" method="post">
+            <input type="text" name="Temperature" placeholder="Temperature" required = "required" /><br>
+            <input type="text" name="RH" placeholder="RH" required = "required" /><br>
+            <input type="text" name="Ws" placeholder="Ws" required = "required" /><br>
+            <input type="text" name="Rain" placeholder="Rain" required = "required" /><br>
+            <input type="text" name="FFMC" placeholder="FFMC" required = "required" /><br>
+            <input type="text" name="DMC" placeholder="DMC" required = "required" /><br>
+            <input type="text" name="ISI" placeholder="ISI" required = "required" /><br>
+            <input type="text" name="Classes" placeholder="Classes" required = "required" /><br>
+            <input type="text" name="Region" placeholder="Region" required = "required" /><br>
+
+
+            <button type="submit" class="btn btn-primary btn-block btn-large">Predict</button>
+
+
+        </form>
+
+        <h2>
+            The Fire Weather Index (FWI) Prediction is {{results}}
+        </h2>
+    </div>
+</body>
+</html>
+
+-->
